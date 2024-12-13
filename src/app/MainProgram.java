@@ -4,6 +4,8 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class MainProgram {
+    private static final int HINT_LENGTH = 15;
+
     public static int findSymbolOccurrence(String str, char ch) {
         int count = 0;
         for (char c : str.toCharArray()) {
@@ -23,46 +25,70 @@ public class MainProgram {
     }
 
     public static boolean isPalindrome(String str) {
-        String reversed = stringReverse(str);
-        return str.equalsIgnoreCase(reversed);
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+        String reversed = stringReverse(str.replaceAll("\\s+", "").toLowerCase());
+        return str.replaceAll("\\s+", "").equalsIgnoreCase(reversed);
     }
 
     public static void guessingGame() {
-        String[] words = {"apple", "orange", "lemon", "banana", "apricot", "avocado", "broccoli",
+        String[] words = initializeWords();
+        String secretWord = selectRandomWord(words);
+        playGame(secretWord);
+    }
+
+    private static String[] initializeWords() {
+        return new String[]{"apple", "orange", "lemon", "banana", "apricot", "avocado", "broccoli",
                 "carrot", "cherry", "garlic", "grape", "melon", "leak", "kiwi",
                 "mango", "mushroom", "nut", "olive", "pea", "peanut", "pear",
                 "pepper", "pineapple", "pumpkin", "potato"};
+    }
 
+    private static String selectRandomWord(String[] words) {
         Random random = new Random();
-        String secretWord = words[random.nextInt(words.length)];
+        return words[random.nextInt(words.length)];
+    }
+
+    private static void playGame(String secretWord) {
         Scanner scanner = new Scanner(System.in);
-        boolean guessed = false;
+        System.out.println("Welcome to the Guessing Game!");
+        System.out.println("Try to guess the secret word. Type 'exit' to quit.");
 
-        System.out.println("Guess the word!");
-
-        while (!guessed) {
+        while (true) {
             System.out.print("Your guess: ");
-            String userGuess = scanner.nextLine().toLowerCase();
+            String userGuess = scanner.nextLine().trim().toLowerCase();
+
+            if (userGuess.equals("exit")) {
+                System.out.println("Thanks for playing! The secret word was: " + secretWord);
+                break;
+            }
 
             if (userGuess.equals(secretWord)) {
-                guessed = true;
                 System.out.println("Congratulations! You guessed the word.");
+                break;
             } else {
-                StringBuilder hint = new StringBuilder();
-                for (int i = 0; i < secretWord.length(); i++) {
-                    if (i < userGuess.length() && secretWord.charAt(i) == userGuess.charAt(i)) {
-                        hint.append(secretWord.charAt(i));
-                    } else {
-                        hint.append('#');
-                    }
-                }
-                while (hint.length() < 15) {
-                    hint.append('#');
-                }
-                System.out.println("Hint: " + hint);
+                System.out.println("Hint: " + generateHint(secretWord, userGuess));
             }
         }
         scanner.close();
+    }
+
+    private static String generateHint(String secretWord, String userGuess) {
+        StringBuilder hint = new StringBuilder();
+
+        for (int i = 0; i < secretWord.length(); i++) {
+            if (i < userGuess.length() && secretWord.charAt(i) == userGuess.charAt(i)) {
+                hint.append(secretWord.charAt(i));
+            } else {
+                hint.append('#');
+            }
+        }
+
+        while (hint.length() < HINT_LENGTH) {
+            hint.append('#');
+        }
+        return hint.toString();
     }
 
     public static void main(String[] args) {
